@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CodeSnap - Social Code Image Generator</title>
+    <link rel="canonical" href="https://www.example.com/code-snap" />
+
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+    <style>
+        /* --- RESET & VARIABLES --- */
+        :root {
+            --google-blue: #4285F4;
+            --google-blue-hover: #3367d6;
+            --google-grey: #f1f3f4;
+            --text-dark: #202124;
+            --text-grey: #5f6368;
+            --border-color: #dadce0;
+
+            /* Presets */
+            --bg-gradient-1: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --bg-gradient-2: linear-gradient(135deg, #FF9A9E 0%, #FECFEF 100%);
+            --bg-gradient-3: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%);
+            --bg-gradient-4: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
+            --bg-gradient-5: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            
+            --window-bg: #1e1e1e;
+        }
+
+        * { box-sizing: border-box; }
+
+        body { 
+            font-family: 'Roboto', -apple-system, sans-serif; 
+            background: var(--google-grey); 
+            padding: 20px; 
+            color: var(--text-dark);
+            margin: 0;
+        }
+
+        /* --- LAYOUT GRID --- */
+        .main-wrapper {
+            display: flex;
+            flex-direction: row; 
+            gap: 30px;
+            max-width: 1200px;
+            margin: 0 auto;
+            align-items: flex-start;
+        }
+
+        .instructions-container { flex: 1; min-width: 250px; }
+        .instructions-content { background: white; padding: 25px; border-radius: 8px; box-shadow: 0 1px 2px 0 rgba(60,64,67,0.3); }
+
+        .tool-container { 
+            flex: 3;
+            background: white; 
+            padding: 30px; 
+            border-radius: 8px; 
+            box-shadow: 0 1px 2px 0 rgba(60,64,67,0.3); 
+            width: 100%;
+        }
+
+        /* --- TYPOGRAPHY --- */
+        h1 { margin-top: 0; color: var(--text-dark); font-size: 24px; font-weight: 400; margin-bottom: 5px; display: flex; align-items: center; gap: 10px; }
+        .subtitle { font-size: 13px; color: var(--text-grey); margin-bottom: 25px; display: block; }
+        h2 { font-size: 18px; margin-top: 0; color: var(--google-blue); }
+        p, li { font-size: 14px; line-height: 1.5; color: var(--text-grey); }
+        ul { padding-left: 20px; }
+        li { margin-bottom: 8px; }
+        .badge { background: #e8f0fe; color: var(--google-blue); padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 500; }
+
+        /* --- TOOLBAR --- */
+        .toolbar {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        select, input[type="text"], input[type="number"] {
+            padding: 0 12px;
+            height: 40px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            background: white;
+            cursor: pointer;
+            font-size: 14px;
+            color: var(--text-dark);
+        }
+        
+        select { min-width: 140px; }
+        input[type="text"] { min-width: 150px; cursor: text; }
+
+        /* Custom Color Controls */
+        .custom-controls {
+            display: none; 
+            gap: 10px;
+            align-items: center;
+            background: #fff;
+            padding: 5px 10px;
+            border-radius: 4px;
+            border: 1px solid var(--border-color);
+        }
+        .custom-controls.active { display: flex; flex-wrap: wrap;}
+
+        .checkbox-group { display: flex; align-items: center; gap: 6px; font-size: 13px; }
+        input[type="color"] { width: 35px; height: 35px; border: none; background: none; cursor: pointer; padding: 0; }
+
+        #gradient-angle {
+            width: 75px; 
+            padding-right: 5px; 
+        }
+
+        button { 
+            height: 40px;
+            padding: 0 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            background-color: var(--google-blue);
+            color: white;
+            margin-left: auto;
+            transition: background 0.2s;
+        }
+        button:hover { background-color: var(--google-blue-hover); }
+
+        /* --- WORKSPACE --- */
+        .workspace { display: flex; gap: 30px; min-height: 500px; }
+        .input-area { flex: 1; display: flex; flex-direction: column; min-width: 300px; }
+
+        textarea {
+            width: 100%; height: 100%; min-height: 400px; padding: 15px;
+            background: #fefefe; border: 1px solid var(--border-color);
+            border-radius: 8px; font-family: 'Fira Code', 'Courier New', monospace;
+            font-size: 13px; resize: vertical; outline: none; color: var(--text-dark);
+        }
+        textarea:focus { border-color: var(--google-blue); }
+
+        .preview-wrapper {
+            flex: 1; background: #f1f3f4; border-radius: 8px;
+            border: 1px solid var(--border-color); display: flex;
+            justify-content: center; align-items: center; padding: 40px; overflow: auto;
+        }
+
+        #export-canvas {
+            background-image: var(--bg-gradient-1);
+            padding: 60px; border-radius: 12px; display: inline-block;
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
+            /* Important for html2canvas capturing */
+            position: relative; 
+            z-index: 1;
+        }
+
+        .mac-window {
+            background-color: var(--window-bg); border-radius: 10px;
+            min-width: 400px; overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        .window-header {
+            padding: 12px 15px; 
+            background: #2d2d2d;
+            position: relative;
+            display: flex;
+            justify-content: center; 
+            align-items: center;
+            height: 44px;
+        }
+
+        .dots {
+            position: absolute;
+            left: 15px;
+            display: flex;
+            gap: 8px;
+        }
+
+        .title-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #999;
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .lang-icon {
+            width: 16px;
+            height: 16px;
+            display: none; 
+        }
+        .lang-icon.visible { display: block; }
+
+        .dot { width: 12px; height: 12px; border-radius: 50%; }
+        .red { background-color: #ff5f56; }
+        .yellow { background-color: #ffbd2e; }
+        .green { background-color: #27c93f; }
+
+        pre[class*="language-"] { margin: 0 !important; background: transparent !important; padding: 20px !important; text-shadow: none !important; }
+        code { font-family: 'Fira Code', 'Consolas', monospace !important; font-size: 14px; line-height: 1.5; }
+
+        /* --- DONATION SECTION --- */
+        .donate-section { margin-top: 25px; padding-top: 20px; border-top: 1px solid var(--border-color); text-align: center; }
+        .donate-text { font-size: 13px; color: var(--text-grey); margin-bottom: 15px; font-style: italic; }
+
+        /* --- RESPONSIVE --- */
+        @media (max-width: 900px) {
+            .main-wrapper { flex-direction: column; padding: 0; }
+            .instructions-container { width: 100%; order: -1; }
+            .tool-container { width: 100%; padding: 20px; }
+            .workspace { flex-direction: column; }
+            button { margin-left: 0; width: 100%; margin-top: 10px; }
+            .custom-controls { width: 100%; justify-content: space-between; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="main-wrapper">
+    
+    <div class="instructions-container">
+        <div class="instructions-content">
+            <h2>How to Use</h2>
+            <ul>
+                <li><strong>Language:</strong> Select your syntax. The logo updates automatically if the checkbox is checked.</li>
+                <li><strong>Title:</strong> Add a filename (e.g., "script.js") to display it in the window header.</li>
+                <li><strong>Gradient:</strong> Choose a preset or create a custom gradient for the background.</li>
+                <li><strong>Download:</strong> Click Download PNG to save your image.</li>
+            </ul>
+            <div class="donate-section">
+                <p class="donate-text">Free tool. If it helps, support is appreciated!</p>
+                <a href="https://www.buymeacoffee.com/PierreCochart" target="_blank">
+                    <img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 45px !important; width: auto !important;" >
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="tool-container">
+        <h1>CodeSnap <span class="badge">v4.2</span></h1>
+        <span class="subtitle">Social media code image generator</span>
+
+        <div class="toolbar">
+            <select id="lang-select">
+                <option value="javascript">JavaScript</option>
+                <option value="css">CSS</option>
+                <option value="python">Python</option>
+                <option value="markup">HTML</option>
+                <option value="java">Java</option>
+                <option value="php">PHP</option>
+            </select>
+
+            <select id="theme-select">
+                <optgroup label="Presets">
+                    <option value="1">Blue/Purple Gradient</option>
+                    <option value="2">Peach/Pink Gradient</option>
+                    <option value="3">Purple/Pink Gradient</option>
+                    <option value="4">Green/Blue Gradient</option>
+                    <option value="5">Warm Sunset Gradient</option>
+                </optgroup>
+                <option value="custom">✨ Custom Gradient...</option>
+            </select>
+
+            <input type="text" id="file-name-input" placeholder="Filename (e.g. app.js)">
+
+            <div class="checkbox-group" style="background:#fff; padding:0 8px; border:1px solid #dadce0; border-radius:4px; height:40px;">
+                <input type="checkbox" id="show-logo-check" checked> 
+                <label for="show-logo-check" style="cursor:pointer;">Logo</label>
+            </div>
+
+            <div id="custom-controls" class="custom-controls">
+                <input type="color" id="color-1" value="#667eea" title="Start Color">
+                <input type="color" id="color-2" value="#764ba2" title="Middle Color">
+                <label style="font-size:12px"><input type="checkbox" id="use-color-2" checked> 3-Color</label>
+                <input type="color" id="color-3" value="#fbc2eb" title="End Color">
+                <input type="number" id="gradient-angle" value="135" min="0" max="360" title="Angle">
+            </div>
+
+            <button id="download-btn">Download PNG</button>
+        </div>
+
+        <div class="workspace">
+            <div class="input-area">
+                <textarea id="code-input" placeholder="Paste your code here...">
+// Share your code with style!
+function createMagic() {
+    const filename = "app.js";
+    const language = "JavaScript";
+    return `Now generating ${filename}...`;
+}</textarea>
+            </div>
+
+            <div class="preview-wrapper">
+                <div id="export-canvas">
+                    <div class="mac-window">
+                        <div class="window-header">
+                            <div class="dots">
+                                <div class="dot red"></div>
+                                <div class="dot yellow"></div>
+                                <div class="dot green"></div>
+                            </div>
+                            <div class="title-container">
+                                <img id="lang-icon" class="lang-icon" alt="Lang Logo" crossorigin="anonymous">
+                                <span id="window-title-text"></span>
+                            </div>
+                        </div>
+                        <div class="window-body">
+                            <pre><code id="code-display" class="language-javascript"></code></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // --- Elements ---
+    const codeInput = document.getElementById('code-input');
+    const codeDisplay = document.getElementById('code-display');
+    const exportCanvas = document.getElementById('export-canvas');
+    const langSelect = document.getElementById('lang-select');
+    const themeSelect = document.getElementById('theme-select');
+    const fileNameInput = document.getElementById('file-name-input');
+    const windowTitleText = document.getElementById('window-title-text');
+    const showLogoCheck = document.getElementById('show-logo-check');
+    const langIcon = document.getElementById('lang-icon');
+    const downloadBtn = document.getElementById('download-btn');
+
+    // Custom Gradient
+    const customControls = document.getElementById('custom-controls');
+    const color1 = document.getElementById('color-1');
+    const color2 = document.getElementById('color-2');
+    const color3 = document.getElementById('color-3');
+    const useColor2 = document.getElementById('use-color-2');
+    const angleInput = document.getElementById('gradient-angle');
+
+    // --- Devicon Mapping ---
+    const iconMap = {
+        'javascript': 'javascript/javascript-original.svg',
+        'css': 'css3/css3-original.svg',
+        'python': 'python/python-original.svg',
+        'markup': 'html5/html5-original.svg',
+        'java': 'java/java-original.svg',
+        'php': 'php/php-original.svg'
+    };
+
+    // --- Init ---
+    updateCode();
+    updateHeader();
+
+    // --- Events ---
+    codeInput.addEventListener('input', updateCode);
+    langSelect.addEventListener('change', () => { updateLanguage(); updateHeader(); });
+    fileNameInput.addEventListener('input', updateHeader);
+    showLogoCheck.addEventListener('change', updateHeader);
+    
+    themeSelect.addEventListener('change', handleThemeChange);
+    [color1, color2, color3, useColor2, angleInput].forEach(el => el.addEventListener('input', updateCustomGradient));
+    
+    downloadBtn.addEventListener('click', downloadImage);
+
+    // 1. Code Logic
+    function updateCode() {
+        let rawCode = codeInput.value;
+        rawCode = rawCode.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        codeDisplay.innerHTML = rawCode;
+        Prism.highlightElement(codeDisplay);
+    }
+
+    function updateLanguage() {
+        codeDisplay.className = `language-${langSelect.value}`;
+        updateCode();
+    }
+
+    // 2. Header (Title + Logo) Logic
+    function updateHeader() {
+        windowTitleText.textContent = fileNameInput.value;
+        const lang = langSelect.value;
+        const iconPath = iconMap[lang];
+        
+        if (showLogoCheck.checked && iconPath) {
+            // NOTE: We set crossorigin anonymous here to ensure the image loads securely
+            langIcon.setAttribute('crossorigin', 'anonymous');
+            langIcon.src = `https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/${iconPath}`;
+            langIcon.classList.add('visible');
+        } else {
+            langIcon.classList.remove('visible');
+        }
+    }
+
+    // 3. Theme Logic
+    function handleThemeChange() {
+        const val = themeSelect.value;
+        if (val === 'custom') {
+            customControls.classList.add('active');
+            updateCustomGradient();
+        } else {
+            customControls.classList.remove('active');
+            exportCanvas.style.backgroundImage = `var(--bg-gradient-${val})`;
+        }
+    }
+
+    function updateCustomGradient() {
+        const angle = angleInput.value;
+        const c1 = color1.value;
+        const c2 = color2.value;
+        const c3 = color3.value;
+        const isThreeColor = useColor2.checked;
+        const grad = isThreeColor 
+            ? `linear-gradient(${angle}deg, ${c1}, ${c2}, ${c3})` 
+            : `linear-gradient(${angle}deg, ${c1}, ${c3})`;
+        exportCanvas.style.backgroundImage = grad;
+    }
+
+    // 4. Download Logic (Fixed)
+    function downloadImage() {
+        const btnText = downloadBtn.textContent;
+        downloadBtn.textContent = "Generating...";
+        
+        html2canvas(exportCanvas, {
+            scale: 2.5,
+            backgroundColor: null,
+            useCORS: true, 
+            // allowTaint: true  <-- REMOVED. This was breaking the download.
+            logging: true
+        }).then(canvas => {
+            const link = document.createElement('a');
+            link.download = 'code-snap.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+            downloadBtn.textContent = btnText;
+        }).catch(err => {
+            console.error("Capture failed:", err);
+            alert("Oops! Could not generate image. Check console for details.");
+            downloadBtn.textContent = btnText;
+        });
+    }
+</script>
+<script data-name="BMC-Widget" data-cfasync="false" src="https://cdnjs.buymeacoffee.com/1.0.0/widget.prod.min.js" data-id="PierreCochart" data-description="Support me on Buy me a coffee!" data-message="" data-color="#4285F4" data-position="Right" data-x_margin="18" data-y_margin="18"></script>
+</body>
+</html>
