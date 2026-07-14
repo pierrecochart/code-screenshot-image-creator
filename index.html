@@ -5,9 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Code Screenshot - Social Code Image Generator | Pierre Cochart</title>
     <link rel="canonical" href="https://pierrecochart.github.io/code-screenshot-image-creator/" />
+    <meta name="description" content="Turn a code snippet into a beautiful, gradient-backed screenshot for Twitter/X, LinkedIn, or blog posts. Syntax highlighting, custom gradients, mac-style window. Free and client-side.">
+    <meta property="og:title" content="Code Screenshot - Social Code Image Generator">
+    <meta property="og:description" content="Turn any code snippet into a shareable, gradient-backed screenshot with syntax highlighting. Free and client-side.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://pierrecochart.github.io/code-screenshot-image-creator/">
+    <meta property="og:image" content="https://placehold.co/1200x630/0F6E8C/FAFAF7?font=roboto&text=CodeSnap">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content="https://placehold.co/1200x630/0F6E8C/FAFAF7?font=roboto&text=CodeSnap">
 
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
-    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+
     <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
@@ -17,31 +27,48 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
     <style>
-        /* --- RESET & VARIABLES --- */
+        /* --- RESET & VARIABLES ---
+             Builder chrome uses the blueprint palette. The gradient presets,
+             the dark mac-window background, and the traffic-light dot colours
+             further down are the actual visual OUTPUT this tool produces —
+             the whole point is a colourful, eye-catching screenshot — so
+             they're deliberately left exactly as they were. */
         :root {
-            --google-blue: #4285F4;
-            --google-blue-hover: #3367d6;
-            --google-grey: #f1f3f4;
-            --text-dark: #202124;
-            --text-grey: #5f6368;
-            --border-color: #dadce0;
+            --google-blue: #0F6E8C;
+            --google-blue-hover: #0B5570;
+            --google-grey: #EFEEE7;
+            --text-dark: #191D22;
+            --text-grey: #565C64;
+            --border-color: #DAD7CC;
 
-            /* Presets */
+            /* Untouched: these are the tool's exported-image output */
             --bg-gradient-1: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             --bg-gradient-2: linear-gradient(135deg, #FF9A9E 0%, #FECFEF 100%);
             --bg-gradient-3: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%);
             --bg-gradient-4: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
             --bg-gradient-5: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
-            
             --window-bg: #1e1e1e;
+
+            /* Sitewide aliases, used by the header/footer/SEO block */
+            --paper: #FAFAF7;
+            --panel: var(--google-grey);
+            --ink: var(--text-dark);
+            --ink-soft: var(--text-grey);
+            --line: var(--border-color);
+            --blueprint: var(--google-blue);
+            --blueprint-dark: var(--google-blue-hover);
+            --amber: #E8A33D;
+            --font-display: 'Space Grotesk', sans-serif;
+            --font-body: 'Inter', sans-serif;
+            --font-mono: 'IBM Plex Mono', monospace;
         }
 
         * { box-sizing: border-box; }
 
-        body { 
-            font-family: 'Roboto', -apple-system, sans-serif; 
-            background: var(--google-grey); 
-            padding: 20px; 
+        body {
+            font-family: var(--font-body);
+            background: var(--google-grey);
+            padding: 0 0 20px;
             color: var(--text-dark);
             margin: 0;
         }
@@ -49,40 +76,41 @@
         /* --- LAYOUT GRID --- */
         .main-wrapper {
             display: flex;
-            flex-direction: row; 
+            flex-direction: row;
             gap: 30px;
             max-width: 1200px;
-            margin: 0 auto;
+            margin: 40px auto 0;
+            padding: 0 20px;
             align-items: flex-start;
         }
 
         .instructions-container { flex: 1; min-width: 250px; }
-        .instructions-content { background: white; padding: 25px; border-radius: 8px; box-shadow: 0 1px 2px 0 rgba(60,64,67,0.3); }
+        .instructions-content { background: var(--paper); padding: 25px; border-radius: 8px; border: 1px solid var(--line); }
 
-        .tool-container { 
+        .tool-container {
             flex: 3;
-            background: white; 
-            padding: 30px; 
-            border-radius: 8px; 
-            box-shadow: 0 1px 2px 0 rgba(60,64,67,0.3); 
+            background: var(--paper);
+            padding: 30px;
+            border-radius: 8px;
+            border: 1px solid var(--line);
             width: 100%;
         }
 
         /* --- TYPOGRAPHY --- */
-        h1 { margin-top: 0; color: var(--text-dark); font-size: 24px; font-weight: 400; margin-bottom: 5px; display: flex; align-items: center; gap: 10px; }
+        h1 { margin-top: 0; color: var(--text-dark); font-family: var(--font-display); font-size: 26px; font-weight: 700; margin-bottom: 5px; display: flex; align-items: center; gap: 10px; }
         .subtitle { font-size: 13px; color: var(--text-grey); margin-bottom: 25px; display: block; }
-        h2 { font-size: 18px; margin-top: 0; color: var(--google-blue); }
+        h2 { font-size: 18px; margin-top: 0; font-family: var(--font-display); font-weight: 600; color: var(--google-blue); }
         p, li { font-size: 14px; line-height: 1.5; color: var(--text-grey); }
         ul { padding-left: 20px; }
         li { margin-bottom: 8px; }
-        .badge { background: #e8f0fe; color: var(--google-blue); padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 500; }
+        .badge { background: #DCEAEE; color: var(--google-blue); padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: 600; font-family: var(--font-mono); }
 
         /* --- TOOLBAR --- */
         .toolbar {
             display: flex;
             gap: 12px;
             margin-bottom: 20px;
-            background: #f8f9fa;
+            background: var(--google-grey);
             padding: 15px;
             border-radius: 8px;
             border: 1px solid var(--border-color);
@@ -95,21 +123,22 @@
             height: 40px;
             border: 1px solid var(--border-color);
             border-radius: 4px;
-            background: white;
+            background: var(--paper);
             cursor: pointer;
             font-size: 14px;
+            font-family: var(--font-body);
             color: var(--text-dark);
         }
-        
+
         select { min-width: 140px; }
         input[type="text"] { min-width: 150px; cursor: text; }
 
         /* Custom Color Controls */
         .custom-controls {
-            display: none; 
+            display: none;
             gap: 10px;
             align-items: center;
-            background: #fff;
+            background: var(--paper);
             padding: 5px 10px;
             border-radius: 4px;
             border: 1px solid var(--border-color);
@@ -117,21 +146,23 @@
         .custom-controls.active { display: flex; flex-wrap: wrap;}
 
         .checkbox-group { display: flex; align-items: center; gap: 6px; font-size: 13px; }
+        input[type="checkbox"] { accent-color: var(--google-blue); }
         input[type="color"] { width: 35px; height: 35px; border: none; background: none; cursor: pointer; padding: 0; }
 
         #gradient-angle {
-            width: 75px; 
-            padding-right: 5px; 
+            width: 75px;
+            padding-right: 5px;
         }
 
-        button { 
+        button {
+            font-family: var(--font-body);
             height: 40px;
             padding: 0 20px;
             border: none;
             border-radius: 4px;
             cursor: pointer;
             font-size: 14px;
-            font-weight: 500;
+            font-weight: 600;
             background-color: var(--google-blue);
             color: white;
             margin-left: auto;
@@ -145,24 +176,24 @@
 
         textarea {
             width: 100%; height: 100%; min-height: 400px; padding: 15px;
-            background: #fefefe; border: 1px solid var(--border-color);
-            border-radius: 8px; font-family: 'Fira Code', 'Courier New', monospace;
+            background: var(--paper); border: 1px solid var(--border-color);
+            border-radius: 8px; font-family: var(--font-mono);
             font-size: 13px; resize: vertical; outline: none; color: var(--text-dark);
         }
         textarea:focus { border-color: var(--google-blue); }
 
         .preview-wrapper {
-            flex: 1; background: #f1f3f4; border-radius: 8px;
+            flex: 1; background: var(--google-grey); border-radius: 8px;
             border: 1px solid var(--border-color); display: flex;
             justify-content: center; align-items: center; padding: 40px; overflow: auto;
         }
 
+        /* --- EXPORTED IMAGE OUTPUT (untouched styling) --- */
         #export-canvas {
             background-image: var(--bg-gradient-1);
             padding: 60px; border-radius: 12px; display: inline-block;
             box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
-            /* Important for html2canvas capturing */
-            position: relative; 
+            position: relative;
             z-index: 1;
         }
 
@@ -173,11 +204,11 @@
         }
 
         .window-header {
-            padding: 12px 15px; 
+            padding: 12px 15px;
             background: #2d2d2d;
             position: relative;
             display: flex;
-            justify-content: center; 
+            justify-content: center;
             align-items: center;
             height: 44px;
         }
@@ -202,7 +233,7 @@
         .lang-icon {
             width: 16px;
             height: 16px;
-            display: none; 
+            display: none;
         }
         .lang-icon.visible { display: block; }
 
@@ -214,25 +245,175 @@
         pre[class*="language-"] { margin: 0 !important; background: transparent !important; padding: 20px !important; text-shadow: none !important; }
         code { font-family: 'Fira Code', 'Consolas', monospace !important; font-size: 14px; line-height: 1.5; }
 
-        /* --- DONATION SECTION --- */
-        .donate-section { margin-top: 25px; padding-top: 20px; border-top: 1px solid var(--border-color); text-align: center; }
-        .donate-text { font-size: 13px; color: var(--text-grey); margin-bottom: 15px; font-style: italic; }
+        /* Buy Me a Coffee card (standardised component) */
+        .bmc-card { margin-top: 25px; padding-top: 20px; border-top: 1px solid var(--line); text-align: center; }
+        .bmc-card__icon { font-size: 1.4rem; margin-bottom: 6px; }
+        .bmc-card__heading { font-family: var(--font-display); font-weight: 600; font-size: 0.98rem; color: var(--ink); margin: 0 0 6px; }
+        .bmc-card__text { font-size: 12.5px; color: var(--ink-soft); margin-bottom: 14px; line-height: 1.5; }
+        .bmc-card__button { display: inline-flex; align-items: center; gap: 8px; background: var(--blueprint); color: #fff; text-decoration: none; font-family: var(--font-body); font-weight: 600; font-size: 0.85rem; padding: 10px 18px; border-radius: 6px; transition: background .15s ease; }
+        .bmc-card__button:hover { background: var(--blueprint-dark); }
+        .bmc-card__button svg { width: 16px; height: 16px; flex-shrink: 0; }
 
         /* --- RESPONSIVE --- */
         @media (max-width: 900px) {
-            .main-wrapper { flex-direction: column; padding: 0; }
+            .main-wrapper { flex-direction: column; padding: 0 20px; }
             .instructions-container { width: 100%; order: -1; }
             .tool-container { width: 100%; padding: 20px; }
             .workspace { flex-direction: column; }
             button { margin-left: 0; width: 100%; margin-top: 10px; }
             .custom-controls { width: 100%; justify-content: space-between; }
         }
+
+        /* --- Site header --- */
+        .site-header { background: var(--paper); border-bottom: 1px solid var(--line); position: sticky; top: 0; z-index: 100; font-family: var(--font-body); }
+        .site-header__ruler { height: 4px; background-image: repeating-linear-gradient(90deg, var(--blueprint) 0 1px, transparent 1px 12px); opacity: 0.5; }
+        .site-header__inner { max-width: 1140px; margin: 0 auto; padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; }
+        .site-header__brand { text-decoration: none; color: var(--ink); line-height: 1.1; }
+        .site-header__eyebrow { display: block; font-family: var(--font-mono); font-size: 0.65rem; letter-spacing: 0.14em; color: var(--blueprint); text-transform: uppercase; margin-bottom: 2px; }
+        .site-header__wordmark { display: block; font-family: var(--font-display); font-weight: 700; font-size: 1.15rem; color: var(--ink); }
+        .nav-toggle { display: none; flex-direction: column; gap: 4px; background: none; border: 1px solid var(--line); border-radius: 4px; cursor: pointer; padding: 8px 10px; }
+        .nav-toggle span { width: 18px; height: 2px; background: var(--ink); display: block; }
+        .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+        .site-nav__list { display: flex; gap: 4px; list-style: none; margin: 0; padding: 0; }
+        .site-nav__item { position: relative; }
+        .site-nav__link { background: none; border: none; font: inherit; font-family: var(--font-body); font-weight: 500; font-size: 0.92rem; cursor: pointer; padding: 9px 12px; color: var(--ink); text-decoration: none; display: inline-block; border-radius: 4px; }
+        .site-nav__link:hover, .site-nav__link:focus { color: var(--blueprint); background: var(--panel); }
+        .dropdown { list-style: none; margin: 0; padding: 6px; position: absolute; top: 100%; left: 0; background: var(--paper); border: 1px solid var(--line); border-radius: 6px; box-shadow: 0 10px 28px rgba(25,29,34,0.10); min-width: 250px; opacity: 0; visibility: hidden; transform: translateY(6px); transition: opacity .15s ease, transform .15s ease, visibility .15s; }
+        .has-dropdown:hover .dropdown, .has-dropdown:focus-within .dropdown { opacity: 1; visibility: visible; transform: translateY(0); }
+        .dropdown li a { display: block; padding: 8px 10px; color: var(--ink); text-decoration: none; border-radius: 4px; font-size: 0.88rem; border-left: 2px solid transparent; }
+        .dropdown li a:hover, .dropdown li a:focus { background: var(--panel); border-left-color: var(--blueprint); color: var(--blueprint-dark); }
+        @media (max-width: 860px) {
+          .nav-toggle { display: flex; }
+          .site-nav { display: none; width: 100%; order: 3; }
+          .site-nav.is-open { display: block; }
+          .site-nav__list { flex-direction: column; gap: 0; }
+          .site-nav__item { width: 100%; }
+          .dropdown { position: static; opacity: 1; visibility: visible; transform: none; box-shadow: none; border: none; display: none; padding-left: 10px; }
+          .has-dropdown.is-open .dropdown { display: block; }
+          .site-header__inner { flex-wrap: wrap; }
+        }
+
+        /* --- SEO content block --- */
+        .tool-content { max-width: 780px; margin: 64px auto 0; padding: 0 20px; font-family: var(--font-body); color: var(--ink); line-height: 1.65; }
+        .tool-content h2 { font-family: var(--font-display); font-size: 1.5rem; margin: 40px 0 14px; color: var(--ink); }
+        .tool-content p { font-size: 0.98rem; color: var(--ink-soft); margin: 0 0 14px; }
+        .faq-item { position: relative; border: 1px solid var(--line); border-radius: 6px; padding: 4px 16px; margin-bottom: 10px; background: var(--paper); }
+        .faq-item::before, .faq-item::after { content: ""; position: absolute; width: 10px; height: 10px; border-color: var(--blueprint); border-style: solid; opacity: 0.6; }
+        .faq-item::before { top: -1px; left: -1px; border-width: 2px 0 0 2px; }
+        .faq-item::after { bottom: -1px; right: -1px; border-width: 0 2px 2px 0; }
+        .faq-item summary { cursor: pointer; font-weight: 600; padding: 14px 0; font-size: 0.96rem; list-style: none; }
+        .faq-item summary::-webkit-details-marker { display: none; }
+        .faq-item summary::after { content: "+"; float: right; font-family: var(--font-mono); color: var(--blueprint); }
+        .faq-item[open] summary::after { content: "–"; }
+        .faq-item p { padding-bottom: 14px; margin: 0; }
+        .related-tools { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 16px; }
+        .related-tools__card { position: relative; display: block; border: 1px solid var(--line); border-radius: 6px; padding: 18px; text-decoration: none; background: var(--paper); transition: border-color .15s ease; }
+        .related-tools__card:hover { border-color: var(--blueprint); }
+        .related-tools__card::before, .related-tools__card::after { content: ""; position: absolute; width: 10px; height: 10px; border-color: var(--blueprint); border-style: solid; opacity: 0.6; }
+        .related-tools__card::before { top: -1px; left: -1px; border-width: 2px 0 0 2px; }
+        .related-tools__card::after { bottom: -1px; right: -1px; border-width: 0 2px 2px 0; }
+        .related-tools__eyebrow { font-family: var(--font-mono); font-size: 0.62rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--blueprint); margin: 0 0 6px; }
+        .related-tools__name { font-family: var(--font-display); font-weight: 600; font-size: 0.98rem; color: var(--ink); margin: 0 0 4px; }
+        .related-tools__desc { font-size: 0.85rem; color: var(--ink-soft); margin: 0; }
+        @media (max-width: 720px) { .related-tools { grid-template-columns: 1fr; } }
+
+        /* --- Site footer --- */
+        .site-footer { background: var(--panel); border-top: 1px solid var(--line); margin-top: 60px; font-family: var(--font-body); }
+        .site-footer__cta { border-bottom: 1px solid var(--line); }
+        .site-footer__cta-inner { max-width: 1140px; margin: 0 auto; padding: 36px 20px; display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
+        .site-footer__cta-text { font-family: var(--font-mono); font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--blueprint); margin: 0 0 4px; }
+        .site-footer__cta-heading { font-family: var(--font-display); font-weight: 600; font-size: 1.2rem; color: var(--ink); margin: 0; }
+        .site-footer__cta-link { font-family: var(--font-body); font-weight: 600; font-size: 0.9rem; color: #fff; background: var(--blueprint); text-decoration: none; padding: 12px 20px; border-radius: 6px; white-space: nowrap; transition: background .15s ease; }
+        .site-footer__cta-link:hover { background: var(--blueprint-dark); }
+        .site-footer__inner { max-width: 1140px; margin: 0 auto; padding: 40px 20px 20px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; }
+        .site-footer__col h3 { font-family: var(--font-mono); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink-soft); margin: 0 0 12px; padding-bottom: 8px; border-bottom: 1px solid var(--line); }
+        .site-footer__col ul { list-style: none; margin: 0; padding: 0; }
+        .site-footer__col li { margin-bottom: 8px; }
+        .site-footer__col a { color: var(--ink); text-decoration: none; font-size: 0.9rem; }
+        .site-footer__col a:hover { color: var(--blueprint); text-decoration: underline; }
+        .site-footer__bottom { max-width: 1140px; margin: 0 auto; padding: 18px 20px 30px; border-top: 1px solid var(--line); font-size: 0.82rem; color: var(--ink-soft); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+        .site-footer__bottom a { color: var(--ink-soft); }
+        .site-footer__bottom a:hover { color: var(--blueprint); }
+        @media (max-width: 860px) { .site-footer__inner { grid-template-columns: repeat(2, 1fr); } }
     </style>
 </head>
 <body>
 
+<header class="site-header">
+  <div class="site-header__ruler"></div>
+  <div class="site-header__inner">
+    <a class="site-header__brand" href="https://pierrecochart.github.io/">
+      <span class="site-header__eyebrow">Free Web Toolkit</span>
+      <span class="site-header__wordmark">Pierre Cochart</span>
+    </a>
+
+    <button class="nav-toggle" id="navToggle" aria-expanded="false" aria-controls="siteNav">
+      <span></span><span></span><span></span>
+      <span class="sr-only">Menu</span>
+    </button>
+
+    <nav class="site-nav" id="siteNav">
+      <ul class="site-nav__list">
+        <li class="site-nav__item has-dropdown">
+          <button class="site-nav__link" aria-expanded="false">Image &amp; Media</button>
+          <ul class="dropdown">
+            <li><a href="https://pierrecochart.github.io/image-cropper/">Bulk Image Cropper</a></li>
+            <li><a href="https://pierrecochart.github.io/image-background-remover/">Image Background Remover</a></li>
+            <li><a href="https://pierrecochart.github.io/color-palette-generator/">Color Palette Generator</a></li>
+            <li><a href="https://pierrecochart.github.io/duotone-generator/">Duotone Generator</a></li>
+            <li><a href="https://pierrecochart.github.io/image-dithering-tool/">Image Dithering Tool</a></li>
+            <li><a href="https://pierrecochart.github.io/advanced-image-cropping-tool/">Advanced Image Cropper</a></li>
+            <li><a href="https://pierrecochart.github.io/image-to-webp-converter/">Image to WebP Converter</a></li>
+            <li><a href="https://pierrecochart.github.io/quickfav-favicon-maker/">QuickFav Favicon Maker</a></li>
+            <li><a href="https://pierrecochart.github.io/svg-cleaner/">SVG Cleaner</a></li>
+            <li><a href="https://pierrecochart.github.io/code-screenshot-image-creator/">Code Screenshot Generator</a></li>
+          </ul>
+        </li>
+        <li class="site-nav__item has-dropdown">
+          <button class="site-nav__link" aria-expanded="false">SEO &amp; Content</button>
+          <ul class="dropdown">
+            <li><a href="https://pierrecochart.github.io/canonical-generating-tool/">Canonical Generator</a></li>
+            <li><a href="https://pierrecochart.github.io/useful-links-builder/">Useful Links Builder</a></li>
+            <li><a href="https://pierrecochart.github.io/hreflang-generator-tool/">Hreflang Generator</a></li>
+            <li><a href="https://pierrecochart.github.io/website-migration-bulk-redirect-tool/">Bulk Redirect Mapper</a></li>
+            <li><a href="https://pierrecochart.github.io/google-dork-search-operator-tool/">Google Dork Builder</a></li>
+            <li><a href="https://pierrecochart.github.io/keyword-mixer-tool/">Keyword Mixer</a></li>
+            <li><a href="https://pierrecochart.github.io/SERP-Snippet-Viewer-Optimiser/">SERP Simulator</a></li>
+            <li><a href="https://pierrecochart.github.io/seo-bulk-header-audit-tool/">SEO Header Audit</a></li>
+            <li><a href="https://pierrecochart.github.io/faq-generator/">FAQ &amp; Schema Generator</a></li>
+            <li><a href="https://pierrecochart.github.io/internal-link-weaver/">Internal Link Weaver</a></li>
+            <li><a href="https://pierrecochart.github.io/word-character-counter-read-time/">Word &amp; Character Counter</a></li>
+            <li><a href="https://pierrecochart.github.io/ai-blog-summarizer-button-generator/">AI Blog Summarizer</a></li>
+          </ul>
+        </li>
+        <li class="site-nav__item has-dropdown">
+          <button class="site-nav__link" aria-expanded="false">PPC &amp; Analytics</button>
+          <ul class="dropdown">
+            <li><a href="https://pierrecochart.github.io/google-adwords-campaign-architect-tool/">AdWords Architect</a></li>
+            <li><a href="https://pierrecochart.github.io/roas-modeller/">ROAS Modeller</a></li>
+            <li><a href="https://pierrecochart.github.io/statistical-significance-calculator/">Significance Calculator</a></li>
+          </ul>
+        </li>
+        <li class="site-nav__item has-dropdown">
+          <button class="site-nav__link" aria-expanded="false">Development</button>
+          <ul class="dropdown">
+            <li><a href="https://pierrecochart.github.io/document-html-link-remover/">Link Remover Tool</a></li>
+            <li><a href="https://pierrecochart.github.io/word-doc-content-sanitizer/">Word Content Sanitizer</a></li>
+            <li><a href="https://pierrecochart.github.io/github-website-builder/">GitHub Website Builder</a></li>
+            <li><a href="https://pierrecochart.github.io/html-editor/">HTML Editor</a></li>
+            <li><a href="https://pierrecochart.github.io/app-store-event-previewer/">App Store Event Previewer</a></li>
+          </ul>
+        </li>
+        <li class="site-nav__item">
+          <a class="site-nav__link" href="https://searchfoundry.co.uk" target="_blank" rel="noopener">SEO/PPC Help ↗</a>
+        </li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
 <div class="main-wrapper">
-    
+
     <div class="instructions-container">
         <div class="instructions-content">
             <h2>How to Use</h2>
@@ -242,10 +423,13 @@
                 <li><strong>Gradient:</strong> Choose a preset or create a custom gradient for the background.</li>
                 <li><strong>Download:</strong> Click Download PNG to save your image.</li>
             </ul>
-            <div class="donate-section">
-                <p class="donate-text">Free tool. If it helps, support is appreciated!</p>
-                <a href="https://www.buymeacoffee.com/PierreCochart" target="_blank">
-                    <img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 45px !important; width: auto !important;" >
+            <div class="bmc-card">
+                <div class="bmc-card__icon">☕</div>
+                <p class="bmc-card__heading">This tool is free to use</p>
+                <p class="bmc-card__text">If it saved you some time, consider buying me a coffee to support future updates.</p>
+                <a class="bmc-card__button" href="https://www.buymeacoffee.com/PierreCochart" target="_blank" rel="noopener">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 10h14a2 2 0 0 1 2 2v1a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4v-3Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M20 12h1a2 2 0 0 1 2 2 3 3 0 0 1-3 3h-1" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M8 3c-.5 1-.5 1.8 0 2.5M12 3c-.5 1-.5 1.8 0 2.5M16 3c-.5 1-.5 1.8 0 2.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+                    Buy me a coffee
                 </a>
             </div>
         </div>
@@ -278,8 +462,8 @@
 
             <input type="text" id="file-name-input" placeholder="Filename (e.g. app.js)">
 
-            <div class="checkbox-group" style="background:#fff; padding:0 8px; border:1px solid #dadce0; border-radius:4px; height:40px;">
-                <input type="checkbox" id="show-logo-check" checked> 
+            <div class="checkbox-group" style="background:var(--paper); padding:0 8px; border:1px solid var(--border-color); border-radius:4px; height:40px;">
+                <input type="checkbox" id="show-logo-check" checked>
                 <label for="show-logo-check" style="cursor:pointer;">Logo</label>
             </div>
 
@@ -329,6 +513,173 @@ function createMagic() {
     </div>
 </div>
 
+<!-- ============================================================ -->
+<!-- SEO CONTENT BLOCK -->
+<!-- ============================================================ -->
+<section class="tool-content">
+
+  <h2>What does CodeSnap do?</h2>
+  <p>CodeSnap turns a code snippet into a polished, shareable screenshot — syntax-highlighted, wrapped in a mac-style window with a filename header, and set against a gradient background. Paste your code, pick a language for accurate highlighting, choose or build a gradient, and export as a PNG ready for Twitter/X, LinkedIn, or a blog post.</p>
+  <p>Choose from five built-in gradient presets or build a fully custom one — two or three colours and any angle. The optional language logo in the window title bar (pulled from the Devicon icon set) adds a recognisable touch for whichever language you're sharing.</p>
+
+  <h2>Frequently asked questions</h2>
+
+  <div class="faq-item">
+    <details>
+      <summary>Is CodeSnap free to use?</summary>
+      <p>Yes, completely free with no account or usage limit.</p>
+    </details>
+  </div>
+
+  <div class="faq-item">
+    <details>
+      <summary>What languages are supported for syntax highlighting?</summary>
+      <p>JavaScript, CSS, Python, HTML, Java, and PHP are available in the language selector, each with accurate syntax colouring powered by Prism.</p>
+    </details>
+  </div>
+
+  <div class="faq-item">
+    <details>
+      <summary>Is my code uploaded anywhere?</summary>
+      <p>No. Syntax highlighting and image generation both happen locally in your browser — your code is never sent to a server.</p>
+    </details>
+  </div>
+
+  <div class="faq-item">
+    <details>
+      <summary>Can I create a custom gradient background?</summary>
+      <p>Yes — select "Custom Gradient" from the theme dropdown to set your own two or three colours and gradient angle, instead of using one of the five presets.</p>
+    </details>
+  </div>
+
+  <div class="faq-item">
+    <details>
+      <summary>Why might the download fail?</summary>
+      <p>Image capture relies on the language logo (if enabled) loading successfully from its icon source. If your connection blocks that request, try disabling the "Logo" checkbox and downloading again.</p>
+    </details>
+  </div>
+
+  <h2>Related tools</h2>
+  <div class="related-tools">
+    <a class="related-tools__card" href="https://pierrecochart.github.io/html-editor/">
+      <p class="related-tools__eyebrow">Development</p>
+      <p class="related-tools__name">HTML Editor</p>
+      <p class="related-tools__desc">Test and preview a snippet before screenshotting it.</p>
+    </a>
+    <a class="related-tools__card" href="https://pierrecochart.github.io/svg-cleaner/">
+      <p class="related-tools__eyebrow">Image &amp; Media</p>
+      <p class="related-tools__name">SVG Cleaner</p>
+      <p class="related-tools__desc">Clean up any SVG assets alongside your code screenshots.</p>
+    </a>
+    <a class="related-tools__card" href="https://pierrecochart.github.io/image-to-webp-converter/">
+      <p class="related-tools__eyebrow">Image &amp; Media</p>
+      <p class="related-tools__name">Image to WebP Converter</p>
+      <p class="related-tools__desc">Compress your exported screenshot for faster page loads.</p>
+    </a>
+  </div>
+
+</section>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    { "@type": "Question", "name": "Is CodeSnap free to use?", "acceptedAnswer": { "@type": "Answer", "text": "Yes, completely free with no account or usage limit." } },
+    { "@type": "Question", "name": "What languages are supported for syntax highlighting?", "acceptedAnswer": { "@type": "Answer", "text": "JavaScript, CSS, Python, HTML, Java, and PHP are available in the language selector, each with accurate syntax colouring powered by Prism." } },
+    { "@type": "Question", "name": "Is my code uploaded anywhere?", "acceptedAnswer": { "@type": "Answer", "text": "No. Syntax highlighting and image generation both happen locally in your browser — your code is never sent to a server." } },
+    { "@type": "Question", "name": "Can I create a custom gradient background?", "acceptedAnswer": { "@type": "Answer", "text": "Yes — select Custom Gradient from the theme dropdown to set your own two or three colours and gradient angle." } },
+    { "@type": "Question", "name": "Why might the download fail?", "acceptedAnswer": { "@type": "Answer", "text": "Image capture relies on the language logo, if enabled, loading successfully from its icon source. If your connection blocks that request, try disabling the Logo checkbox and downloading again." } }
+  ]
+}
+</script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "CodeSnap",
+  "url": "https://pierrecochart.github.io/code-screenshot-image-creator/",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Any (runs in browser)",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "GBP" },
+  "creator": { "@type": "Person", "name": "Pierre Cochart", "url": "https://pierrecochart.github.io/" }
+}
+</script>
+
+<!-- ============================================================ -->
+<!-- SITE FOOTER -->
+<!-- ============================================================ -->
+<footer class="site-footer">
+  <div class="site-footer__cta">
+    <div class="site-footer__cta-inner">
+      <div>
+        <p class="site-footer__cta-text">Need more than a free tool?</p>
+        <p class="site-footer__cta-heading">The Search Foundry runs SEO &amp; PPC strategy for growing brands.</p>
+      </div>
+      <a class="site-footer__cta-link" href="https://searchfoundry.co.uk" target="_blank" rel="noopener">Talk to the agency ↗</a>
+    </div>
+  </div>
+
+  <div class="site-footer__inner">
+    <div class="site-footer__col">
+      <h3>Image &amp; Media</h3>
+      <ul>
+        <li><a href="https://pierrecochart.github.io/image-cropper/">Bulk Image Cropper</a></li>
+        <li><a href="https://pierrecochart.github.io/image-background-remover/">Image Background Remover</a></li>
+        <li><a href="https://pierrecochart.github.io/color-palette-generator/">Color Palette Generator</a></li>
+        <li><a href="https://pierrecochart.github.io/duotone-generator/">Duotone Generator</a></li>
+        <li><a href="https://pierrecochart.github.io/image-dithering-tool/">Image Dithering Tool</a></li>
+        <li><a href="https://pierrecochart.github.io/advanced-image-cropping-tool/">Advanced Image Cropper</a></li>
+        <li><a href="https://pierrecochart.github.io/image-to-webp-converter/">Image to WebP Converter</a></li>
+        <li><a href="https://pierrecochart.github.io/quickfav-favicon-maker/">QuickFav Favicon Maker</a></li>
+        <li><a href="https://pierrecochart.github.io/svg-cleaner/">SVG Cleaner</a></li>
+        <li><a href="https://pierrecochart.github.io/code-screenshot-image-creator/">Code Screenshot Generator</a></li>
+      </ul>
+    </div>
+    <div class="site-footer__col">
+      <h3>SEO &amp; Content</h3>
+      <ul>
+        <li><a href="https://pierrecochart.github.io/canonical-generating-tool/">Canonical Generator</a></li>
+        <li><a href="https://pierrecochart.github.io/useful-links-builder/">Useful Links Builder</a></li>
+        <li><a href="https://pierrecochart.github.io/hreflang-generator-tool/">Hreflang Generator</a></li>
+        <li><a href="https://pierrecochart.github.io/website-migration-bulk-redirect-tool/">Bulk Redirect Mapper</a></li>
+        <li><a href="https://pierrecochart.github.io/google-dork-search-operator-tool/">Google Dork Builder</a></li>
+        <li><a href="https://pierrecochart.github.io/keyword-mixer-tool/">Keyword Mixer</a></li>
+        <li><a href="https://pierrecochart.github.io/SERP-Snippet-Viewer-Optimiser/">SERP Simulator</a></li>
+        <li><a href="https://pierrecochart.github.io/seo-bulk-header-audit-tool/">SEO Header Audit</a></li>
+        <li><a href="https://pierrecochart.github.io/faq-generator/">FAQ &amp; Schema Generator</a></li>
+        <li><a href="https://pierrecochart.github.io/internal-link-weaver/">Internal Link Weaver</a></li>
+        <li><a href="https://pierrecochart.github.io/word-character-counter-read-time/">Word &amp; Character Counter</a></li>
+        <li><a href="https://pierrecochart.github.io/ai-blog-summarizer-button-generator/">AI Blog Summarizer</a></li>
+      </ul>
+    </div>
+    <div class="site-footer__col">
+      <h3>PPC &amp; Analytics</h3>
+      <ul>
+        <li><a href="https://pierrecochart.github.io/google-adwords-campaign-architect-tool/">AdWords Architect</a></li>
+        <li><a href="https://pierrecochart.github.io/roas-modeller/">ROAS Modeller</a></li>
+        <li><a href="https://pierrecochart.github.io/statistical-significance-calculator/">Significance Calculator</a></li>
+      </ul>
+    </div>
+    <div class="site-footer__col">
+      <h3>Development</h3>
+      <ul>
+        <li><a href="https://pierrecochart.github.io/document-html-link-remover/">Link Remover Tool</a></li>
+        <li><a href="https://pierrecochart.github.io/word-doc-content-sanitizer/">Word Content Sanitizer</a></li>
+        <li><a href="https://pierrecochart.github.io/github-website-builder/">GitHub Website Builder</a></li>
+        <li><a href="https://pierrecochart.github.io/html-editor/">HTML Editor</a></li>
+        <li><a href="https://pierrecochart.github.io/app-store-event-previewer/">App Store Event Previewer</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="site-footer__bottom">
+    <p>&copy; <span id="footerYear"></span> <a href="https://uk.linkedin.com/in/pierrecochart">Pierre Cochart</a>. Free, open-source, client-side tools.</p>
+    <p>Built &amp; maintained by <a href="https://searchfoundry.co.uk" target="_blank" rel="noopener">The Search Foundry</a></p>
+  </div>
+</footer>
+
 <script>
     // --- Elements ---
     const codeInput = document.getElementById('code-input');
@@ -342,7 +693,6 @@ function createMagic() {
     const langIcon = document.getElementById('lang-icon');
     const downloadBtn = document.getElementById('download-btn');
 
-    // Custom Gradient
     const customControls = document.getElementById('custom-controls');
     const color1 = document.getElementById('color-1');
     const color2 = document.getElementById('color-2');
@@ -350,7 +700,6 @@ function createMagic() {
     const useColor2 = document.getElementById('use-color-2');
     const angleInput = document.getElementById('gradient-angle');
 
-    // --- Devicon Mapping ---
     const iconMap = {
         'javascript': 'javascript/javascript-original.svg',
         'css': 'css3/css3-original.svg',
@@ -360,22 +709,19 @@ function createMagic() {
         'php': 'php/php-original.svg'
     };
 
-    // --- Init ---
     updateCode();
     updateHeader();
 
-    // --- Events ---
     codeInput.addEventListener('input', updateCode);
     langSelect.addEventListener('change', () => { updateLanguage(); updateHeader(); });
     fileNameInput.addEventListener('input', updateHeader);
     showLogoCheck.addEventListener('change', updateHeader);
-    
+
     themeSelect.addEventListener('change', handleThemeChange);
     [color1, color2, color3, useColor2, angleInput].forEach(el => el.addEventListener('input', updateCustomGradient));
-    
+
     downloadBtn.addEventListener('click', downloadImage);
 
-    // 1. Code Logic
     function updateCode() {
         let rawCode = codeInput.value;
         rawCode = rawCode.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
@@ -388,14 +734,12 @@ function createMagic() {
         updateCode();
     }
 
-    // 2. Header (Title + Logo) Logic
     function updateHeader() {
         windowTitleText.textContent = fileNameInput.value;
         const lang = langSelect.value;
         const iconPath = iconMap[lang];
-        
+
         if (showLogoCheck.checked && iconPath) {
-            // NOTE: We set crossorigin anonymous here to ensure the image loads securely
             langIcon.setAttribute('crossorigin', 'anonymous');
             langIcon.src = `https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/${iconPath}`;
             langIcon.classList.add('visible');
@@ -404,7 +748,6 @@ function createMagic() {
         }
     }
 
-    // 3. Theme Logic
     function handleThemeChange() {
         const val = themeSelect.value;
         if (val === 'custom') {
@@ -422,22 +765,20 @@ function createMagic() {
         const c2 = color2.value;
         const c3 = color3.value;
         const isThreeColor = useColor2.checked;
-        const grad = isThreeColor 
-            ? `linear-gradient(${angle}deg, ${c1}, ${c2}, ${c3})` 
+        const grad = isThreeColor
+            ? `linear-gradient(${angle}deg, ${c1}, ${c2}, ${c3})`
             : `linear-gradient(${angle}deg, ${c1}, ${c3})`;
         exportCanvas.style.backgroundImage = grad;
     }
 
-    // 4. Download Logic (Fixed)
     function downloadImage() {
         const btnText = downloadBtn.textContent;
         downloadBtn.textContent = "Generating...";
-        
+
         html2canvas(exportCanvas, {
             scale: 2.5,
             backgroundColor: null,
-            useCORS: true, 
-            // allowTaint: true  <-- REMOVED. This was breaking the download.
+            useCORS: true,
             logging: true
         }).then(canvas => {
             const link = document.createElement('a');
@@ -451,7 +792,29 @@ function createMagic() {
             downloadBtn.textContent = btnText;
         });
     }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        var footerYearEl = document.getElementById('footerYear');
+        if (footerYearEl) footerYearEl.textContent = new Date().getFullYear();
+
+        var toggle = document.getElementById('navToggle');
+        var nav = document.getElementById('siteNav');
+        if (toggle && nav) {
+            toggle.addEventListener('click', function () {
+                var isOpen = nav.classList.toggle('is-open');
+                toggle.setAttribute('aria-expanded', isOpen);
+            });
+        }
+        document.querySelectorAll('.has-dropdown > .site-nav__link').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                if (window.innerWidth > 860) return;
+                var parent = btn.closest('.has-dropdown');
+                var isOpen = parent.classList.toggle('is-open');
+                btn.setAttribute('aria-expanded', isOpen);
+            });
+        });
+    });
 </script>
-<script data-name="BMC-Widget" data-cfasync="false" src="https://cdnjs.buymeacoffee.com/1.0.0/widget.prod.min.js" data-id="PierreCochart" data-description="Support me on Buy me a coffee!" data-message="" data-color="#4285F4" data-position="Right" data-x_margin="18" data-y_margin="18"></script>
+<script data-name="BMC-Widget" data-cfasync="false" src="https://cdnjs.buymeacoffee.com/1.0.0/widget.prod.min.js" data-id="PierreCochart" data-description="Support me on Buy me a coffee!" data-message="" data-color="#0F6E8C" data-position="Right" data-x_margin="18" data-y_margin="18"></script>
 </body>
 </html>
